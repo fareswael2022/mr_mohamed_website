@@ -675,14 +675,14 @@ function AuthScreen({ onSuccess }: { onSuccess: () => void }) {
               <span>Username</span>
               <div className="auth-input">
                 <User size={17} />
-                <input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Enter your username (default: maryam)" required autoFocus />
+                <input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Username (default: maryam)" required autoFocus />
               </div>
             </label>
             <label>
               <span>Password</span>
               <div className="auth-input">
                 <Lock size={17} />
-                <input type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter your password (default: 0000)" required />
+                <input type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password (default: 0000)" required />
                 <button
                   type="button"
                   className="auth-input-toggle"
@@ -768,6 +768,11 @@ function Dashboard({
   const [mobileMenu, setMobileMenu] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
+  // Scroll to top whenever the view changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [view]);
+
   // If a video session is currently active, render the dedicated Video Classroom Theater
   if (activeSession) {
     return (
@@ -787,7 +792,16 @@ function Dashboard({
 
   return (
     <div className="app-shell app-shell--entering">
+      {/* Mobile sidebar overlay */}
+      {mobileMenu && (
+        <div className="sidebar-overlay" onClick={() => setMobileMenu(false)} aria-hidden="true" />
+      )}
+
       <aside className={`sidebar ${mobileMenu ? 'sidebar--open' : ''}`}>
+        {/* Mobile close button inside sidebar */}
+        <button className="sidebar-close-btn" onClick={() => setMobileMenu(false)} aria-label="Close menu">
+          <X size={18} />
+        </button>
         <div className="side-brand">
           <img src="/assets/logo/LOGO_MR_M_ABOELNAGA-BLACK.png" alt="Mohammed Aboelnaga" />
         </div>

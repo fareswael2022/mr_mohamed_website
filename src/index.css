@@ -137,6 +137,15 @@ h1 em, h2 em, .session-hero h3 em { font: italic 500 1em 'Playfair Display', ser
 @keyframes bar-fill { to { width: 100%; } }
 @keyframes dash-enter { from { opacity: 0; transform: translateY(20px) scale(.99); } to { opacity: 1; transform: none; } }
 .app-shell { min-height: 100vh; display: flex; background: #f8f8f6; width: 100%; }
+
+/* Sidebar overlay (mobile backdrop) */
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(17,23,24,.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); z-index: 999; animation: overlay-in .22s ease; }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Sidebar close button (only shown on mobile) */
+.sidebar-close-btn { display: none; position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border: 1.5px solid var(--line); border-radius: 9px; background: #f5f6f3; color: #5a6059; cursor: pointer; place-items: center; transition: background .15s, color .15s; flex-shrink: 0; }
+.sidebar-close-btn:hover { background: #ffe9e9; border-color: #f4a0a0; color: #c0392b; }
+
 .sidebar { width: 260px; flex: 0 0 260px; background: #fff; border-right: 1px solid var(--line); padding: 28px 20px 22px; display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; overflow-y: auto; z-index: 10; }
 .side-brand { padding: 0 10px 24px; }.side-brand img { width: 155px; height: auto; display: block; }
 .course-chip { display: flex; align-items: center; gap: 11px; padding: 14px 12px; background: #fbfbf8; border: 1px solid #eef0eb; border-radius: 9px; }.course-icon { width: 34px; height: 34px; display: grid; place-items: center; background: var(--yellow); border-radius: 7px; }.course-chip div:last-child { display: grid; gap: 3px; }.course-chip strong { font-size: 12px; }.course-chip span { color: #949895; font-size: 10px; }
@@ -1420,22 +1429,31 @@ h1 em, h2 em, .session-hero h3 em { font: italic 500 1em 'Playfair Display', ser
     box-shadow: 0 4px 20px rgba(17,23,24,.05);
     margin: 0 auto;
   }
-  .auth-card-top { margin-bottom: 14px; }
-  .auth-input input { font-size: 16px; }
+  .auth-card-top { margin-bottom: 12px; }
+  /* Fix inputs — taller, placeholder never truncates */
+  .auth-input { height: 52px; border-radius: 12px; padding: 0 14px; gap: 10px; }
+  .auth-input input { font-size: 16px; min-width: 0; }
+  .auth-input input::placeholder { font-size: 14px; }
+  .auth-form label { font-size: 11px; gap: 5px; }
+  .auth-form { gap: 14px; }
+  .auth-submit { height: 52px; font-size: 14px; border-radius: 12px; }
+  .auth-demo-hint { font-size: 12px; padding: 10px 14px; }
   h1 { font-size: clamp(26px, 6.5vw, 34px); margin: 10px 0 8px; }
-  .auth-copy { margin-bottom: 16px; }
-  .auth-card-footer { margin-top: 16px; padding-top: 14px; }
+  .auth-copy { margin-bottom: 14px; }
+  .auth-card-footer { margin-top: 14px; padding-top: 12px; font-size: 10.5px; }
 
   /* ── App shell / Sidebar ──────────────── */
   .app-shell { overflow-x: hidden; }
   .main-area { overflow-x: hidden; min-width: 0; }
   .sidebar {
-    position: fixed; left: -280px; top: 0; bottom: 0;
-    width: 270px; z-index: 1000;
+    position: fixed; left: -300px; top: 0; bottom: 0;
+    width: 280px; z-index: 1000;
     transition: left .3s cubic-bezier(.2,.8,.2,1);
     box-shadow: 16px 0 40px rgba(17,23,24,.15);
+    padding-top: 58px;
   }
   .sidebar--open { left: 0; }
+  .sidebar-close-btn { display: grid; }
   .mobile-menu { display: grid; place-items: center; }
 
   /* ── Topbar ───────────────────────────── */
@@ -1524,14 +1542,35 @@ h1 em, h2 em, .session-hero h3 em { font: italic 500 1em 'Playfair Display', ser
   /* ── Player main layout ────────────────── */
   .player-main-layout {
     grid-template-columns: 1fr;
-    padding: 14px 14px 40px;
-    gap: 14px;
+    padding: 0 0 40px;
+    gap: 12px;
     overflow-x: hidden;
   }
   .player-main-layout > * { min-width: 0; }
-  .video-screen-card { border-radius: 12px; }
-  .video-watermark-logo { width: 90px; }
+
+  /* Video — full bleed on mobile, no border-radius at edges */
+  .video-screen-card { border-radius: 0; box-shadow: none; border: none; }
+  .video-display-area { border-radius: 0; }
+  .video-watermark-logo { width: 80px; top: 12px; right: 12px; }
   .video-teacher-card { max-width: 92%; }
+
+  /* Control dock — compact, wrap speed pills */
+  .player-control-dock { padding: 10px 14px 12px; gap: 8px; }
+  .player-controls-left { gap: 8px; }
+  .player-controls-right { gap: 6px; }
+  .speed-selector { gap: 2px; padding: 2px; }
+  .speed-pill { font-size: 10px; padding: 2px 5px; }
+  .hd-badge { display: none; }
+  .time-display { font-size: 11px; }
+
+  /* Expand/fullscreen button — larger tap target on mobile */
+  .ctrl-btn { padding: 8px; }
+  .ctrl-btn--play svg { width: 20px; height: 20px; }
+
+  /* Cards below video get padding */
+  .lesson-meta-card { border-radius: 0; margin: 0; border-left: none; border-right: none; padding: 16px 16px; }
+  .sidebar-progress-strip { border-radius: 0; border-left: none; border-right: none; margin: 0; padding: 12px 16px; }
+  .player-sidebar-card { border-radius: 0; border-left: none; border-right: none; margin: 0; }
 
   /* ── Lesson meta card — stack vertically ─ */
   .lesson-meta-card {
