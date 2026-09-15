@@ -1132,6 +1132,7 @@ function VideoSessionClassroom({
   const [activeTab, setActiveTab] = useState<'notes' | 'chapters' | 'formulas' | 'resources'>('notes');
   const [completed, setCompleted] = useState(lesson.completed);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isCssFullscreen, setIsCssFullscreen] = useState(false);
   const videoCardRef = useRef<HTMLDivElement>(null);
 
   // Sync fullscreen state
@@ -1182,14 +1183,28 @@ function VideoSessionClassroom({
   };
 
   const handleToggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      videoCardRef.current?.requestFullscreen().catch(() => {
-        // Fallback
+    if (isCssFullscreen) {
+      setIsCssFullscreen(false);
+      return;
+    }
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+      return;
+    }
+    // Try native fullscreen; fall back to CSS fullscreen if it doesn't activate
+    const tryNative = document.fullscreenEnabled && videoCardRef.current;
+    if (tryNative) {
+      videoCardRef.current!.requestFullscreen().catch(() => {
+        setIsCssFullscreen(true);
       });
+      // If native fullscreen didn't activate within 300ms, use CSS fallback
+      setTimeout(() => {
+        if (!document.fullscreenElement) {
+          setIsCssFullscreen(true);
+        }
+      }, 300);
     } else {
-      document.exitFullscreen().catch(() => {
-        // Fallback
-      });
+      setIsCssFullscreen(true);
     }
   };
 
@@ -1227,7 +1242,7 @@ function VideoSessionClassroom({
       <div className="player-main-layout">
         {/* Left Column: Video Theater Screen & Controls */}
         <div className="player-theater-column">
-          <div className="video-screen-card" ref={videoCardRef}>
+          <div className={`video-screen-card${isCssFullscreen ? ' video-screen-card--css-fs' : ''}`} ref={videoCardRef}>
             <div className="video-display-area">
               {/* Animated Physics Stage Background */}
               <div className="video-physics-backdrop">
@@ -1330,9 +1345,9 @@ function VideoSessionClassroom({
                   <button
                     className="ctrl-btn"
                     onClick={handleToggleFullscreen}
-                    title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+                    title={(isFullscreen || isCssFullscreen) ? 'Exit Fullscreen' : 'Enter Fullscreen'}
                   >
-                    {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                    {(isFullscreen || isCssFullscreen) ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
                   </button>
 
                   <span className="hd-badge">1080p 60fps</span>
